@@ -26,6 +26,7 @@ def logout():
     else:
         return redirect("/")
 
+# zz game 접어라
 """
 여기에 로그아웃 함수 작성 route 를 logout 으로 한다음에
 AG.HTML 에서 로그아웃 버튼 만들고 클릭하면 

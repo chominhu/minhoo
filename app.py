@@ -7,7 +7,7 @@ API_KEY = "RGAPI-503d7f15-4e2f-4646-9c10-99214e11ae90"
 TOKEN_URL = 'https://kauth.kakao.com/oauth/token'
 CSECRET ="BGDkauFdjU9lEtb1n6G7tesgpoNNONwb"
 CID = "57f9d0c11d0039471ba6a9d38162c466"
-RURI= "http://localhost:5000/callback"   #REDIRECT_URI  #https://127.0.0.1:5000/callback
+RURI= "http://127.0.0.1:5000/callback"   #REDIRECT_URI  #https://127.0.0.1:5000/callback
 KAKAO_LOGIN_URL = "https://kauth.kakao.com/oauth/authorize?client_id="+CID+"&redirect_uri="+RURI+"&scope=profile_nickname,profile_image,talk_message&response_type=code"
 
 @app.route('/')
@@ -141,7 +141,7 @@ def getMatchHistroy(gameName, tagLine):
     #응답 받은거 json바꾸고 그중 첫번째 매치 번호를 matchNumber0 에 넣기.
     #print(matchNumber0)
     matchDetail = []
-    for i in range(10):
+    for i in range(5):
         try:
             matchDetailResponse = requests.get("https://asia.api.riotgames.com/lol/match/v5/matches/"+ matchListResponse[i]+"?api_key="+API_KEY)
             matchDetailResponse = matchDetailResponse.json()
@@ -196,7 +196,6 @@ def search():
         print("내 인덱스 번호: ", myIndexNum)
         match_history_lst = []
         for a in range(10):
-            print(matchhistory)
             #10명의 유저 게임 기록 뽑기.
             gamename = (matchhistory['info']['participants'][a]['riotIdGameName'])
             teamId = (matchhistory['info']['participants'][a]['teamId'])

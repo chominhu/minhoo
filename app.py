@@ -128,15 +128,14 @@ def getAuthCode():
 
 
 def getMatchHistroy(gameName, tagLine):
-    apiKey = "RGAPI-503d7f15-4e2f-4646-9c10-99214e11ae90"
-    response = requests.get("https://asia.api.riotgames.com/riot/account/v1/accounts/by-riot-id/"+ gameName+"/"+tagLine+"?api_key="+apiKey)
+    response = requests.get("https://asia.api.riotgames.com/riot/account/v1/accounts/by-riot-id/"+ gameName+"/"+tagLine+"?api_key="+API_KEY)
     #게임네임이랑 태그라인 넣어서 apikey 사용해서 puuid를받아오는 API호출해서 응답받은 결과를 response변수에 저장.
     puuid = response.json()['puuid']
     #응답받은 response에서, puuid를 추출
 
     #https://asia.api.riotgames.com/riot/account/v1/accounts/by-riot-id/쮸니1/KR1?api_key=RGAPI-2772a19c-520f-4571-af40-31a5dcb6f07f
     #puuid로 이제 최근 매치 리스트 볼 수 있는데 API호출
-    matchListResponse = requests.get('https://asia.api.riotgames.com/lol/match/v5/matches/by-puuid/'+puuid+'/ids?start=0&count=20&api_key='+apiKey)
+    matchListResponse = requests.get('https://asia.api.riotgames.com/lol/match/v5/matches/by-puuid/'+puuid+'/ids?start=0&count=20&api_key='+API_KEY)
     matchListResponse = matchListResponse.json()
     #printMatchList(matchListResponse)
     #응답 받은거 json바꾸고 그중 첫번째 매치 번호를 matchNumber0 에 넣기.
@@ -175,7 +174,7 @@ def search():
     PersonalTier = ""
     PersonalRank = ""
     try:
-        Personaltier = requests.get("https://kr.api.riotgames.com/lol/league/v4/entries/by-summoner/Wsbfae1squ2_zUNKfUQPKA-J5NzhAUd4mZGr8vBtzPQX49M?api_key=RGAPI-c6dc95f4-9472-4b01-af2c-78a435a50d12")
+        Personaltier = requests.get("https://kr.api.riotgames.com/lol/league/v4/entries/by-summoner/Wsbfae1squ2_zUNKfUQPKA-J5NzhAUd4mZGr8vBtzPQX49M?api_key=API_KEY)
         print("내 티어 결과 수신: ",Personaltier)
         Personaltier = Personaltier.json()
         PersonalTier = (Personaltier[0]['tier'])
@@ -198,7 +197,6 @@ def search():
         match_history_lst = []
         for a in range(10):
             print(matchhistory)
-            apiKey = "RGAPI-503d7f15-4e2f-4646-9c10-99214e11ae90"
             #10명의 유저 게임 기록 뽑기.
             gamename = (matchhistory['info']['participants'][a]['riotIdGameName'])
             teamId = (matchhistory['info']['participants'][a]['teamId'])

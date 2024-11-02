@@ -174,7 +174,7 @@ def search():
     PersonalTier = ""
     PersonalRank = ""
     try:
-        Personaltier = requests.get("https://kr.api.riotgames.com/lol/league/v4/entries/by-summoner/Wsbfae1squ2_zUNKfUQPKA-J5NzhAUd4mZGr8vBtzPQX49M?api_key=API_KEY)
+        Personaltier = requests.get("https://kr.api.riotgames.com/lol/league/v4/entries/by-summoner/Wsbfae1squ2_zUNKfUQPKA-J5NzhAUd4mZGr8vBtzPQX49M?api_key="+API_KEY)
         print("내 티어 결과 수신: ",Personaltier)
         Personaltier = Personaltier.json()
         PersonalTier = (Personaltier[0]['tier'])

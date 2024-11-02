@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>siuuuuuuuuuu</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 15px;
+      background-color: white;
+    }
+
+    h1 {
+      font-size: 24px;
+      text-align: center;
+    }
+
+    .toggle-button {
+      width: 100%;
+      margin-bottom: 10px;
+      padding: 12px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s, transform 0.1s;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .toggle-button:hover {
+      background-color: #45a049;
+    }
+
+    .toggle-button:active {
+      transform: scale(0.98);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      border-radius: 6px;
+      overflow: hidden;
+      font-size: 11px;
+    }
+
+    th, td {
+      border: none;
+      padding: 6px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #4CAF50;
+      color: white;
+      font-weight: bold;
+      text-transform: uppercase;
+      font-size: 12px;
+    }
+
+    td {
+      background-color: #f8f8f8;
+      border-bottom: 1px solid #ddd;
+    }
+
+    tr:nth-child(even) td {
+      background-color: #f2f2f2;
+    }
+
+    tr:hover td {
+      background-color: #e8e8e8;
+      transition: background-color 0.3s ease;
+    }
+
+    .container {
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+    }
+
+    .container button {
+      margin: 10px;
+    }
+
+    .container img {
+      max-width: 80px;
+      height: auto;
+    }
+
+    @media (max-width: 600px) {
+      table {
+        font-size: 9px;
+      }
+
+      td {
+        padding: 3px;
+      }
+
+      .container img {
+        max-width: 50px;
+      }
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .social-button {
+      background-color: #FEE500;
+      border: none;
+      border-radius: 50%;
+      width: 120px;
+      height: 120px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .social-button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 8px rgba(0,0,0,0.15);
+    }
+
+    .social-button:active {
+      transform: translateY(-1px);
+      box-shadow: 0 5px 7px rgba(0,0,0,0.1);
+    }
+
+    .social-button img {
+      width: 60%;
+      height: auto;
+    }
+
+    /* 화면 너비가 768px 이하일 때 */
+    @media (max-width: 600px) {
+        body {
+            font-size: 10px;
+        }
+    }
+
+  </style>
+</head>
+<body>
+  <h1></h1>
+  {{championname}}
+  {{summoner_name}}
+  {{PersonalTier}}
+  {{PersonalRank}}
+  <!--{{bans_lst}}-->
+  {% for i in match_history_lst_10 %}
+  <div>
+    <button class="toggle-button" onclick="toggleTable('table-{{loop.index}}')">{{loop.index}}번째 경기 보기/숨기기</button>
+  </div>
+  <table id="table-{{loop.index}}" class="table hidden">
+    <thead>
+      <tr>
+        <th>이름</th>
+        <th>팀</th>
+        <th>챔피언</th>
+        <th>라인</th>
+        <th>KDA</th>
+        <th>킬</th>
+        <th>데스</th>
+        <th>솔로킬</th>
+        <th>어시스트</th>
+        <th>승/패</th>
+        <th>아이템</th>
+        <th>티어</th>
+        <th>레벨</th>  <!-- Add a header for level -->
+      </tr>
+    </thead>
+    <tbody>
+      {% for j in i %}
+      <tr>
+      {% for k in j %}
+        {% if loop.index == 3 %}
+          <td>
+            {% if championname == 'Aurora' %}
+              <img src="https://opgg-static.akamaized.net/meta/images/lol/latest/champion/Aurora.png?image=e_upscale,c_crop,h_103,w_103,x_9,y_9/q_auto:good,f_webp,w_160,h_160&v=1729058249" alt="{{ championname }}">
+            {% else %}
+              <img src="http://ddragon.leagueoflegends.com/cdn/13.10.1/img/champion/{{ k }}.png" alt="{{ k }}" style="width: 30px; height: 30px; border-radius: 50%;">
+            {% endif %}
+            {{k}}<br>  <!-- Display the name -->
+            Level: {{ match_history_lst_10[loop.parent.index][loop.index - 1][13] }}  <!-- Display the level -->
+          </td>
+        {% elif loop.index == 11 %}
+          <td>
+            {% for item_id in k %}
+              {% if item_id == 4646 %}
+                <img src="https://opgg-static.akamaized.net/meta/images/lol/latest/item/4646.png?image=e_upscale,q_auto:good,f_webp,w_64,h_64&v=1729058249" alt="Item {{ item_id }}" style="width: 25px; height: 25px; margin-right: 1px;">
+              {% elif item_id == 3147 %}
+                <img src="https://opgg-static.akamaized.net/meta/images/lol/latest/item/3147.png?image=e_upscale,q_auto:good,f_webp,w_64,h_64&v=1729058249" alt="Item {{ item_id }}" style="width: 25px; height: 25px; margin-right: 1px;">
+                {% elif item_id == 3877 %}
+                <img src="https://opgg-static.akamaized.net/meta/images/lol/latest/item/3877.png?image=e_upscale,q_auto:good,f_webp,w_64,h_64&v=1729058249" alt="Item {{ item_id }}" style="width: 25px; height: 25px; margin-right: 1px;">
+                {% elif item_id == 3871 %}
+                <img src="https://opgg-static.akamaized.net/meta/images/lol/latest/item/3871.png?image=e_upscale,q_auto:good,f_webp,w_64,h_64&v=1729058249" alt="Item {{ item_id }}" style="width: 25px; height: 25px; margin-right: 1px;">
+                {% elif item_id == 2022 %}
+                <img src="https://opgg-static.akamaized.net/meta/images/lol/latest/item/2022.png?image=e_upscale,q_auto:good,f_webp,w_64,h_64&v=1729058249" alt="Item {{ item_id }}" style="width: 25px; height: 25px; margin-right: 1px;">
+                {% elif item_id == 6701 %}
+                <img src="https://opgg-static.akamaized.net/meta/images/lol/latest/item/6701.png?image=e_upscale,q_auto:good,f_webp,w_64,h_64&v=1729058249" alt="Item {{ item_id }}" style="width: 25px; height: 25px; margin-right: 1px;">
+                {% elif item_id == 2503 %}
+                <img src="https://opgg-static.akamaized.net/meta/images/lol/latest/item/2503.png?image=e_upscale,q_auto:good,f_webp,w_64,h_64&v=1729058249" alt="Item {{ item_id }}" style="width: 25px; height: 25px; margin-right: 1px;">
+                {% elif item_id == 2508 %}
+                <img src="https://opgg-static.akamaized.net/meta/images/lol/latest/item/2508.png?image=e_upscale,q_auto:good,f_webp,w_64,h_64&v=1729058249" alt="Item {{ item_id }}" style="width: 25px; height: 25px; margin-right: 1px;">
+                {% elif item_id == 3010 %}
+                <img src="https://opgg-static.akamaized.net/meta/images/lol/latest/item/3010.png?image=e_upscale,q_auto:good,f_webp,w_64,h_64&v=1729058249" alt="Item {{ item_id }}" style="width: 25px; height: 25px; margin-right: 1px;">
+                {% elif item_id == 3877 %}
+                <img src="https://opgg-static.akamaized.net/meta/images/lol/latest/item/3877.png?image=e_upscale,q_auto:good,f_webp,w_64,h_64&v=1729058249" alt="Item {{ item_id }}" style="width: 25px; height: 25px; margin-right: 1px;">
+                {% elif item_id == 6610 %}
+                <img src="https://opgg-static.akamaized.net/meta/images/lol/latest/item/6610.png?image=e_upscale,q_auto:good,f_webp,w_64,h_64&v=1729058249" alt="Item {{ item_id }}" style="width: 25px; height: 25px; margin-right: 1px;">
+                {% elif item_id == 2021 %}
+                <img src="https://opgg-static.akamaized.net/meta/images/lol/latest/item/2021.png?image=e_upscale,q_auto:good,f_webp,w_64,h_64&v=1729058249" alt="Item {{ item_id }}" style="width: 25px; height: 25px; margin-right: 1px;">
+                {% elif item_id == 3870 %}
+                <img src="https://opgg-static.akamaized.net/meta/images/lol/latest/item/3870.png?image=e_upscale,q_auto:good,f_webp,w_64,h_64&v=1729058249" alt="Item {{ item_id }}" style="width: 25px; height: 25px; margin-right: 1px;">
+                {% elif item_id == 3869 %}
+                <img src="https://opgg-static.akamaized.net/meta/images/lol/latest/item/3869.png?image=e_upscale,q_auto:good,f_webp,w_64,h_64&v=1729058249" alt="Item {{ item_id }}" style="width: 25px; height: 25px; margin-right: 1px;">
+                {% elif item_id == 3118 %}
+                <img src="https://opgg-static.akamaized.net/meta/images/lol/latest/item/3118.png?image=e_upscale,q_auto:good,f_webp,w_64,h_64&v=1729058249" alt="Item {{ item_id }}" style="width: 25px; height: 25px; margin-right: 1px;">
+                {% elif item_id == 3013 %}
+                <img src="https://opgg-static.akamaized.net/meta/images/lol/latest/item/3013.png?image=e_upscale,q_auto:good,f_webp,w_64,h_64&v=1729058249" alt="Item {{ item_id }}" style="width: 25px; height: 25px; margin-right: 1px;">
+                {% elif item_id == 2020 %}
+                <img src="https://opgg-static.akamaized.net/meta/images/lol/latest/item/2020.png?image=e_upscale,q_auto:good,f_webp,w_64,h_64&v=1729058249" alt="Item {{ item_id }}" style="width: 25px; height: 25px; margin-right: 1px;">
+                {% elif item_id == 3876 %}
+                <img src="https://opgg-static.akamaized.net/meta/images/lol/latest/item/3876.png?image=e_upscale,q_auto:good,f_webp,w_64,h_64&v=1729058249" alt="Item {{ item_id }}" style="width: 25px; height: 25px; margin-right: 1px;">
+                {% elif item_id == 3147 %}
+                <img src="https://opgg-static.akamaized.net/meta/images/lol/latest/item/3147.png?image=e_upscale,q_auto:good,f_webp,w_64,h_64&v=1729058249" alt="Item {{ item_id }}" style="width: 25px; height: 25px; margin-right: 1px;">
+              {% else %}
+                <img src="http://ddragon.leagueoflegends.com/cdn/13.10.1/img/item/{{ item_id }}.png" alt="Item {{ item_id }}" style="width: 25px; height: 25px; margin-right: 1px;">
+              {% endif %}
+              {{items}}
+            {% endfor %}
+          </td>
+        {% elif loop.index == 10 %}
+          <td style="color: {{ 'blue' if k else 'red' }};">{{ '승리' if k else '패배' }}</td>
+        {% else %}
+          <td>{{k}}</td>
+        {% endif %}
+      {% endfor %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endfor %}
+  <div class="container">
+    <!--<button type = "submit" class="container"> <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Instagram_icon.png/1200px-Instagram_icon.png" height="120" width=120"> </button>
+    <!--카톡-->
+    <button class="social-button" onclick='location.href = "/kakaomessage?name={{summoner_name}}"'>
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/KakaoTalk_logo.svg/2500px-KakaoTalk_logo.svg.png" alt="KakaoTalk">
+    </button>
+    <form action="/login2" method="get">
+      <!--<button type = "submit" class="container"> <img src="https://upload.wikimedia.org/wikipedia/commons/b/b9/2023_Facebook_icon.svg" height="120" width="120"> </button>-->
+    </form>
+  </div>
+</body>
+<script>
+  function toggleTable(tableId) {
+    var table = document.getElementById(tableId);
+    if (table.classList.contains('hidden')) {
+      table.classList.remove('hidden');
+    } else {
+      table.classList.add('hidden');
+    }
+  }
+</script>
+</html>

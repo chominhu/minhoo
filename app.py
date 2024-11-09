@@ -162,6 +162,26 @@ def search2():
     if request.method == 'GET':
         name = request.args.get('name')
         tag = request.args.get('tag')
+    else:
+        summoner_name = request.form['summoner_name']
+        print(summoner_name)
+        nickname = summoner_name.split('#')
+        name = nickname[0]
+        
+        tag = nickname[1]
+    #이게 제일 중요
+    matchHistoryRetList, puuid = getMatchHistroy(name, tag)
+    PersonalTier = ""
+    PersonalRank = ""
+    try:
+        Personaltier = requests.get("https://kr.api.riotgames.com/lol/league/v4/entries/by-summoner/Wsbfae1squ2_zUNKfUQPKA-J5NzhAUd4mZGr8vBtzPQX49M?api_key="+API_KEY)
+        print("내 티어 결과 수신: ",Personaltier)
+        Personaltier = Personaltier.json()
+        PersonalTier = (Personaltier[0]['tier'])
+        PersonalRank = (Personaltier[0]['rank'])
+    except:
+        PersonalTier = "Undefined"
+        PersonalRank = "Undefined"
 
 @app.route('/search', methods=['GET','POST'])
 def search():

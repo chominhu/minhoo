@@ -156,6 +156,12 @@ def kakaotalkLogin():
     url = "http://127.0.0.1:5000"
     return render_template('katalk.html', url = url)
 
+@app.route('/search2', methods = ['GET','POST'])
+def search2():
+    summoner_name = ""
+    if request.method == 'GET':
+        name = request.args.get('name')
+        tag = request.args.get('tag')
 
 @app.route('/search', methods=['GET','POST'])
 def search():

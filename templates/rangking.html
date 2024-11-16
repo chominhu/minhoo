@@ -1,0 +1,91 @@
+<!-- champion_analyze.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>rangking</title>
+    <style>
+        .navbar {
+            background-color: #5383EB;
+            padding: 10px 0;
+        }
+        .navbar-container {
+            max-width: 1200px;
+            height: 70px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items:end;
+        }
+        .logo {
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            text-decoration: none;
+        }
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #007bff;
+            color: white;
+            height: 30px;
+            width: 30px;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        .champion-image {
+            width: 50px;
+            height: 50px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="/" class="logo">AG.GG</a>
+            <div class="nav-links">
+                <a href="">홈</a>
+                <a href="championanalyze">챔피언 분석</a>
+                <a href="rangking">랭킹</a>
+                <a href="total">통계</a>
+            </div>
+        </div>
+    </nav>    
+    <h1>랭킹</h1>
+    <table border="1">
+        <tr>
+            <th>소환사</th>
+            <th>티어</th>
+            <th>LP</th>
+            <th>모스트 챔피언</th>
+            <th>레벨</th>
+            <th>승률</th>
+        </tr>
+        {% for champion in champions %}
+        <tr>
+            <td><img src="https://ddragon.leagueoflegends.com/cdn/13.10.1/img/champion/{{ champion.name }}.png" alt="{{ champion.name }}" style="width: 30px; height: 30px; border-radius: 50%;"> {{ champion.name }}</td>
+            <td>{{ champion.role }}</td>
+            <td>{{ champion.win_rate }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

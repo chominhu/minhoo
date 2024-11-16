@@ -3,11 +3,11 @@ import requests
 import json
 app = Flask(__name__)    #KR_7194336697
 app.secret_key = 'chominhu'
-API_KEY = "RGAPI-bfc07099-23fc-49f6-b43f-1e3e5a73b542"
+API_KEY = "RGAPI-d99fdc77-13a4-4894-8381-fb51379ccf5d"
 TOKEN_URL = 'https://kauth.kakao.com/oauth/token'
 CSECRET ="BGDkauFdjU9lEtb1n6G7tesgpoNNONwb"
 CID = "57f9d0c11d0039471ba6a9d38162c466"
-RURI= "http://127.0.0.1:5000/callback"   #REDIRECT_URI  #https://127.0.0.1:5000/callback
+RURI= "https://minhu.site/callback"   #REDIRECT_URI  #https://127.0.0.1:5000/callback
 KAKAO_LOGIN_URL = "https://kauth.kakao.com/oauth/authorize?client_id="+CID+"&redirect_uri="+RURI+"&scope=profile_nickname,profile_image,talk_message&response_type=code"
 
 @app.route('/')
@@ -156,32 +156,6 @@ def kakaotalkLogin():
     url = "http://127.0.0.1:5000"
     return render_template('katalk.html', url = url)
 
-@app.route('/search2', methods = ['GET','POST'])
-def search2():
-    summoner_name = ""
-    if request.method == 'GET':
-        name = request.args.get('name')
-        tag = request.args.get('tag')
-    else:
-        summoner_name = request.form['summoner_name']
-        print(summoner_name)
-        nickname = summoner_name.split('#')
-        name = nickname[0]
-        
-        tag = nickname[1]
-    #이게 제일 중요
-    matchHistoryRetList, puuid = getMatchHistroy(name, tag)
-    PersonalTier = ""
-    PersonalRank = ""
-    try:
-        Personaltier = requests.get("https://kr.api.riotgames.com/lol/league/v4/entries/by-summoner/Wsbfae1squ2_zUNKfUQPKA-J5NzhAUd4mZGr8vBtzPQX49M?api_key="+API_KEY)
-        print("내 티어 결과 수신: ",Personaltier)
-        Personaltier = Personaltier.json()
-        PersonalTier = (Personaltier[0]['tier'])
-        PersonalRank = (Personaltier[0]['rank'])
-    except:
-        PersonalTier = "Undefined"
-        PersonalRank = "Undefined"
 
 @app.route('/search', methods=['GET','POST'])
 def search():
@@ -313,64 +287,95 @@ def search():
 
 def printMatchList(matchListResponse):
     
-	for i in range(10):
-		matchDetailResponse = requests.get("https://asia.api.riotgames.com/lol/match/v5/matches/"+matchListResponse[i]+"?api_key="+API_KEY)
-		print(matchDetailResponse.text)
-		matchhistory = matchDetailResponse.text
-		apiKey = "RGAPI-503d7f15-4e2f-4646-9c10-99214e11ae90"
-		gamename = (matchhistory['info']['participants'][i]['riotIdGameName'])
-		teamId = (matchhistory['info']['participants'][i]['teamId'])
-		championname = ('챔피언 : ' + matchhistory['info']['participants'][i]['championName'])
-		position = ('라인 : ' + matchhistory['info']['participants'][i]['individualPosition'])
-		kda = ('kda : ' + str(matchhistory['info']['participants'][i]['challenges']['kda']))
-		# KDA값 반올림
-		kda = round(float(kda), 2)
-		kda = str(kda)
-		kdaa = ('kda : ' + str(kda))
-		print(kdaa)
-		kill = ('총 킬 : ' + str(matchhistory['info']['participants'][i]['kills']))
-		death = ('죽음 : ' + str(matchhistory['info']['participants'][i]['deaths']))
-		solokill = ('솔킬 : ' + str(matchhistory['info']['participants'][i]['challenges']['soloKills']))
-		assists = ('어시스트 : ' + str(matchhistory['info']['participants'][i]['assists']))
-		winandworse = (matchhistory['info']['participants'][i]['win'])
-		items = (matchhistory['info']['participants'][i]['items'])
-		#여기서 summonerId뽑기
-		summonerId = (matchhistory['info']['participants'][i]['summonerId'])
-		profileicon = (matchhistory['info']['participants'][i]['profileIcon'])
-		#여기서 추가 request날리기
-		#tier = requests.get('https://asia.api.riotgames.com/lol/league/v4/entries/by-summoner/'+summonerId+"?api_key="+apiKey)
-		tier = requests.get("https://kr.api.riotgames.com/lol/league/v4/entries/by-summoner/"+summonerId+"?api_key="+apiKey)
-		tier = tier.json()
-		#이후print하기
+    for i in range(10):
+        matchDetailResponse = requests.get("https://asia.api.riotgames.com/lol/match/v5/matches/"+matchListResponse[i]+"?api_key="+API_KEY)
+        print(matchDetailResponse.text)
+        matchhistory = matchDetailResponse.text
+        apiKey = "RGAPI-503d7f15-4e2f-4646-9c10-99214e11ae90"
+        gamename = (matchhistory['info']['participants'][i]['riotIdGameName'])
+        teamId = (matchhistory['info']['participants'][i]['teamId'])
+        championname = ('챔피언 : ' + matchhistory['info']['participants'][i]['championName'])
+        position = ('라인 : ' + matchhistory['info']['participants'][i]['individualPosition'])
+        kda = ('kda : ' + str(matchhistory['info']['participants'][i]['challenges']['kda']))
+        # KDA값 반올림
+        kda = round(float(kda), 2)
+        kda = str(kda)
+        kdaa = ('kda : ' + str(kda))
+        print(kdaa)
+        kill = ('총 킬 : ' + str(matchhistory['info']['participants'][i]['kills']))
+        death = ('죽음 : ' + str(matchhistory['info']['participants'][i]['deaths']))
+        solokill = ('솔킬 : ' + str(matchhistory['info']['participants'][i]['challenges']['soloKills']))
+        assists = ('어시스트 : ' + str(matchhistory['info']['participants'][i]['assists']))
+        winandworse = (matchhistory['info']['participants'][i]['win'])
+        items = (matchhistory['info']['participants'][i]['items'])
+        #여기서 summonerId뽑기
+        summonerId = (matchhistory['info']['participants'][i]['summonerId'])
+        profileicon = (matchhistory['info']['participants'][i]['profileIcon'])
+        #여기서 추가 request날리기
+        #tier = requests.get('https://asia.api.riotgames.com/lol/league/v4/entries/by-summoner/'+summonerId+"?api_key="+apiKey)
+        tier = requests.get("https://kr.api.riotgames.com/lol/league/v4/entries/by-summoner/"+summonerId+"?api_key="+apiKey)
+        tier = tier.json()
+        #이후print하기
 
-		print(tier)
-		Tier = (tier[0]['tier'])
-		Rank = (tier[0]['rank'])
-	#여기서 반복문사용해서 매치기록 10개를 콜하고 프린트하세요
+        print(tier)
+        Tier = (tier[0]['tier'])
+        Rank = (tier[0]['rank'])
+    #여기서 반복문사용해서 매치기록 10개를 콜하고 프린트하세요
 
-	lst = [gamename, teamId, championname, position, kdaa, kill, death, solokill, assists, winandworse, items,Tier, Rank]
-	#print("===============================================================================")
-	#print(gamename)
-	#print(teamId)
-	#print(championname)
-	#print(position)
-	#print(kda)
-	#print(kill)
-	#print(death)
-	#print(solokill)
-	#print(assists)
-	#print(winandworse)
-	#print(Tier)
-	#print(Rank)
-	#print(kdaa)
+    lst = [gamename, teamId, championname, position, kdaa, kill, death, solokill, assists, winandworse, items,Tier, Rank]
+    #print("===============================================================================")
+    #print(gamename)
+    #print(teamId)
+    #print(championname)
+    #print(position)
+    #print(kda)
+    #print(kill)
+    #print(death)
+    #print(solokill)
+    #print(assists)
+    #print(winandworse)
+    #print(Tier)
+    #print(Rank)
+    #print(kdaa)
 
+@app.route('/riot.txt')
+def riot_txt():
+    return render_template('riot_txt.html')
+
+@app.route('/championanalyze')
+def champion_analyze():
+    # Fetch all champions from the Riot Games API
+    response = requests.get(f"https://ddragon.leagueoflegends.com/cdn/14.22.1/data/en_US/champion.json")
+    champions_data = response.json()
+    champions = []
+
+    # Extract champion details
+    for champion_key, champion_info in champions_data['data'].items():
+        champions.append({
+            "name": champion_info['name'],
+            "role": champion_info['tags'][0] if champion_info['tags'] else "Unknown",  # Get the first role
+            "win_rate": "N/A"  # Placeholder for win rate
+        })
+
+    return render_template('champion_analyze.html', champions=champions)
+
+@app.route('/rangking')
+def rangking():
+    # Fetch all champions from the Riot Games API
+    response = requests.get(f"https://ddragon.leagueoflegends.com/cdn/14.22.1/data/en_US/champion.json")
+    champions_data = response.json()
+    champions = []
+
+    # Extract champion details
+    for champion_key, champion_info in champions_data['data'].items():
+        champions.append({
+            "name": champion_info['name'],
+            "role": champion_info['tags'][0] if champion_info['tags'] else "Unknown",  # Get the first role
+            "win_rate": "N/A"  # Placeholder for win rate
+        })
+
+    return render_template('rangking.html', champions=champions)
 
 if __name__ == '__main__':
-	app.debug = True
-	app.run(host="0.0.0.0", port="5000")#, port="443", ssl_context='adhoc')
-
-#https://blog.naver.com/mds_datasecurity/222182943542 Oauth2.0 공부해오기
-
-
-
-
+    app.debug = True
+    app.run(host="0.0.0.0", port="5000")#, port="443", ssl_context='adhoc')

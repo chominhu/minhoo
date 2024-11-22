@@ -7,7 +7,7 @@ API_KEY = "RGAPI-3867e020-53d1-4617-9720-24f0488a73d8"
 TOKEN_URL = 'https://kauth.kakao.com/oauth/token'
 CSECRET ="BGDkauFdjU9lEtb1n6G7tesgpoNNONwb"
 CID = "57f9d0c11d0039471ba6a9d38162c466"
-RURI= "http://minhu.site/callback"   #REDIRECT_URI  #https://127.0.0.1:5000/callback
+RURI= "https://minhu.site/callback"   #REDIRECT_URI  #https://127.0.0.1:5000/callback
 KAKAO_LOGIN_URL = "https://kauth.kakao.com/oauth/authorize?client_id="+CID+"&redirect_uri="+RURI+"&scope=profile_nickname,profile_image,talk_message&response_type=code"
 
 

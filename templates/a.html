@@ -2,18 +2,19 @@
 <html>
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>siuuuuuuuuuu</title>
+  <title>User</title>
   <style>
     .navbar {
       background-color: #5383EB;
-      padding: 10px 0;
+      padding: 0px 0;
     }
     .navbar-container {
       max-width: 1200px;
+      height: 30px;
       margin: 0 auto;
       display: flex;
       justify-content: space-between;
-      align-items: center;
+      align-items:end;
     }
     .logo {
       color: white;
@@ -30,7 +31,7 @@
       background-image: url("{{ url_for('static', filename='lol.jpg') }}");
       background-size: cover;
       background-position: center;
-      height: 300px; /* 400px에서 300px로 줄임 */
+      height: 70px; /* 400px에서 300px로 줄임 */
       display: flex;
       align-items: center;
       justify-content: center;
@@ -38,12 +39,35 @@
     }
     .search-container {
       background-color: rgba(255, 255, 255, 0.9);
-      padding: 20px;
+      padding: 10px;
       border-radius: 8px;
-      width: 600px;
+      width: 500px;
     }
     .search-form {
-      display: flex;
+        display: flex;
+        align-items: center;
+    }
+    .search-form select, .search-form input[type="text"] {
+        padding: 10px;
+        margin-right: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+    .search-form input[type="text"] {
+        flex-grow: 1;
+    }
+    .search-form button {
+        background-color: #5383EB;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    .login-container {
+        text-align: center;
+        margin-top: 20px;
+    }
     body {
       font-family: Arial, sans-serif;
       margin: 0;
@@ -60,7 +84,7 @@
       width: 100%;
       margin-bottom: 10px;
       padding: 12px;
-      background-color: #4CAF50;
+      background-color: #6e96eb;
       color: white;
       border: none;
       border-radius: 5px;
@@ -189,47 +213,52 @@
   </style>
 </head>
 <body>
-  <a href="/" class="logo">AG.GG</a>
-  <div class="hero">
-    <div class="search-container">
-        <form class="search-form" action="/search" method="post">
-            <select name="region" id="region">
-                <option value="na">North America</option>
-                <option value="me">Middle East</option>
-                <option value="eu_w">Europe West</option>
-                <option value="eu_ne">Europe Nordic & East</option>
-                <option value="oc">Oceania</option>
-                <option value="kr">Korea</option>
-                <option value="jp">Japan</option>
-                <option value="br">Brazil</option>
-                <option value="las">LAS</option>
-                <option value="lan">LAN</option>
-                <option value="ru">Russia</option>
-                <option value="tr">Turkey</option>
-                <option value="sg">Singapore</option>
-                <option value="ph">Philippines</option>
-                <option value="tw">Taiwan</option>
-                <option value="vn">Vietnam</option>
-                <option value="th">Thailand</option>
-                <!-- 다른 지역 옵션들... -->
-            </select>
-            <input type="text" name="summoner_name" placeholder="소환사명을 입력하세요" required>
-            <button type="submit">.GG</button>
-        </form>
+  <!--<a href="/" class="logo">AG.GG</a>-->
+  <nav class="navbar">
+    <div class="hero">
+        <div class="search-container">
+            <form class="search-form" action="/search" method="post">
+                <select name="region" id="region">
+                    <option value="na">North America</option>
+                    <option value="me">Middle East</option>
+                    <option value="eu_w">Europe West</option>
+                    <option value="eu_ne">Europe Nordic & East</option>
+                    <option value="oc">Oceania</option>
+                    <option value="kr">Korea</option>
+                    <option value="jp">Japan</option>
+                    <option value="br">Brazil</option>
+                    <option value="las">LAS</option>
+                    <option value="lan">LAN</option>
+                    <option value="ru">Russia</option>
+                    <option value="tr">Turkey</option>
+                    <option value="sg">Singapore</option>
+                    <option value="ph">Philippines</option>
+                    <option value="tw">Taiwan</option>
+                    <option value="vn">Vietnam</option>
+                    <option value="th">Thailand</option>
+                    <!-- 다른 지역 옵션들... -->
+                </select>
+                <input type="text" name="summoner_name" placeholder="소환사명을 입력하세요" required>
+                <button type="submit">.GG</button>
+            </form>
+        </div>
     </div>
-  </div>
-  <div class="nav-links">
-    <a href="">홈</a>
-    <a href="championanalyze">챔피언 분석</a>
-    <a href="rangking">랭킹</a>
-    <a href="total">통계</a>
-  </div>
+    <div class="navbar-container">
+        <a href="/" class="logo">AG.GG</a>
+        <div class="nav-links">
+            <a href="">홈</a>
+            <a href="championanalyze">챔피언 분석</a>
+            <a href="rangking">랭킹</a>
+            <a href="total">통계</a>
+        </div>
+    </div>
+  </nav>
   <h1></h1>
   {{championname}}
   {{summoner_name}}
   {{PersonalTier}}
   {{PersonalRank}}
-  <!--{{bans_lst}}-->
+  {{bans_lst}}
   {% for i in match_history_lst_10 %}
   <div>
     <button class="toggle-button" onclick="toggleTable('table-{{loop.index}}')">{{loop.index}}번째 경기 보기/숨기기</button>
@@ -249,7 +278,6 @@
         <th>승/패</th>
         <th>아이템</th>
         <th>티어</th>
-        <th>레벨</th>  <!-- Add a header for level -->
       </tr>
     </thead>
     <tbody>
@@ -303,6 +331,8 @@
                 <img src="https://opgg-static.akamaized.net/meta/images/lol/latest/item/3013.png?image=e_upscale,q_auto:good,f_webp,w_64,h_64&v=1729058249" alt="Item {{ item_id }}" style="width: 25px; height: 25px; margin-right: 1px;">
                 {% elif item_id == 2020 %}
                 <img src="https://opgg-static.akamaized.net/meta/images/lol/latest/item/2020.png?image=e_upscale,q_auto:good,f_webp,w_64,h_64&v=1729058249" alt="Item {{ item_id }}" style="width: 25px; height: 25px; margin-right: 1px;">
+                {% elif item_id == 6699 %}
+                <img src="https://opgg-static.akamaized.net/meta/images/lol/latest/item/6699.png?image=e_upscale,q_auto:good,f_webp,w_64,h_64&v=1729058249" alt="Item {{ item_id }}" style="width: 25px; height: 25px; margin-right: 1px;">
                 {% elif item_id == 3876 %}
                 <img src="https://opgg-static.akamaized.net/meta/images/lol/latest/item/3876.png?image=e_upscale,q_auto:good,f_webp,w_64,h_64&v=1729058249" alt="Item {{ item_id }}" style="width: 25px; height: 25px; margin-right: 1px;">
                 {% elif item_id == 3147 %}
@@ -315,6 +345,10 @@
           </td>
         {% elif loop.index == 10 %}
           <td style="color: {{ 'blue' if k else 'red' }};">{{ '승리' if k else '패배' }}</td>
+        {% elif loop.index == 13 %}
+          <!--<td>
+            <img src="http://ddragon.leagueoflegends.com/cdn/13.10.1/img/profileicon/{{ icon }}.png" alt="Profile Icon" style="width: 30px; height: 30px; border-radius: 50%;">
+          </td>--> <!--프로필아이콘 사진-->
         {% else %}
           <td>{{k}}</td>
         {% endif %}
@@ -326,7 +360,7 @@
   {% endfor %}
   <div class="container">
     <!--<button type = "submit" class="container"> <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Instagram_icon.png/1200px-Instagram_icon.png" height="120" width=120"> </button>
-    <!--카톡-->
+    카톡-->
     <button class="social-button" onclick='location.href = "/kakaomessage?name={{summoner_name}}"'>
       <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/KakaoTalk_logo.svg/2500px-KakaoTalk_logo.svg.png" alt="KakaoTalk">
     </button>

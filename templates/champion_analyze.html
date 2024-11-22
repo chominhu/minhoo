@@ -1,4 +1,3 @@
-<!-- champion_analyze.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,13 +5,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Champion Analyze</title>
     <style>
+        .hero {
+            background-image: url("{{ url_for('static', filename='lol.jpg') }}");
+            background-size: cover;
+            background-position: center;
+            height: 70px; /* 400px에서 300px로 줄임 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: -20px; /* 네비게이션 바와의 간격을 줄임 */
+        }
+        .search-container {
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 10px;
+            border-radius: 8px;
+            width: 500px;
+        }
+        .search-form {
+            display: flex;
+            align-items: center;
+        }
         .navbar {
             background-color: #5383EB;
             padding: 10px 0;
         }
         .navbar-container {
             max-width: 1200px;
-            height: 70px;
+            height: 30px;
             margin: 0 auto;
             display: flex;
             justify-content: space-between;
@@ -96,7 +115,7 @@
                 <a href="total">통계</a>
             </div>
         </div>
-    </nav>    
+    </nav>
     <h1>챔피언 분석</h1>
     <table border="1">
         <tr>
@@ -109,9 +128,15 @@
         </tr>
         {% for champion in champions %}
         <tr>
-            <td><img src="https://ddragon.leagueoflegends.com/cdn/13.10.1/img/champion/{{ champion.name }}.png" alt="{{ champion.name }}" style="width: 30px; height: 30px; border-radius: 50%;"> {{ champion.name }}</td>
-            <td>{{ champion.role }}</td>
-            <td>{{ champion.win_rate }}</td>
+            <td>
+                <img src="https://ddragon.leagueoflegends.com/cdn/13.10.1/img/champion/{{ champion.name }}.png" alt="{{ champion.name }}" class="champion-image"> 
+                {{ champion.name }}
+            </td>
+            <td>{{ champion.tier }}</td>
+            <td>{{ champion.position }}</td>
+            <td>{{ champion.win_rate }}%</td>
+            <td>{{ champion.pick_rate }}%</td>
+            <td>{{ champion.ban_rate }}%</td>
         </tr>
         {% endfor %}
     </table>

@@ -1,4 +1,3 @@
-<!-- champion_analyze.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,7 +11,7 @@
         }
         .navbar-container {
             max-width: 1200px;
-            height: 70px;
+            height: 30px;
             margin: 0 auto;
             display: flex;
             justify-content: space-between;
@@ -55,10 +54,58 @@
             width: 50px;
             height: 50px;
         }
+        .hero {
+            background-image: url("{{ url_for('static', filename='lol.jpg') }}");
+            background-size: cover;
+            background-position: center;
+            height: 70px; /* 400px에서 300px로 줄임 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: -20px; /* 네비게이션 바와의 간격을 줄임 */
+        }
+        .search-container {
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 10px;
+            border-radius: 8px;
+            width: 500px;
+        }
+        .search-form {
+            display: flex;
+            align-items: center;
+        }
     </style>
 </head>
 <body>
     <nav class="navbar">
+        <div class="hero">
+            <div class="search-container">
+                <form class="search-form" action="/search" method="post">
+                    <select name="region" id="region">
+                        <option value="na">North America</option>
+                        <option value="me">Middle East</option>
+                        <option value="eu_w">Europe West</option>
+                        <option value="eu_ne">Europe Nordic & East</option>
+                        <option value="oc">Oceania</option>
+                        <option value="kr">Korea</option>
+                        <option value="jp">Japan</option>
+                        <option value="br">Brazil</option>
+                        <option value="las">LAS</option>
+                        <option value="lan">LAN</option>
+                        <option value="ru">Russia</option>
+                        <option value="tr">Turkey</option>
+                        <option value="sg">Singapore</option>
+                        <option value="ph">Philippines</option>
+                        <option value="tw">Taiwan</option>
+                        <option value="vn">Vietnam</option>
+                        <option value="th">Thailand</option>
+                        <!-- 다른 지역 옵션들... -->
+                    </select>
+                    <input type="text" name="summoner_name" placeholder="소환사명을 입력하세요" required>
+                    <button type="submit">.GG</button>
+                </form>
+            </div>
+        </div>
         <div class="navbar-container">
             <a href="/" class="logo">AG.GG</a>
             <div class="nav-links">
@@ -68,7 +115,7 @@
                 <a href="total">통계</a>
             </div>
         </div>
-    </nav>    
+    </nav>   
     <h1>랭킹</h1>
     <table border="1">
         <tr>

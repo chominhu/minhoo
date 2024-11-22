@@ -41,6 +41,7 @@
                 display: flex;
                 align-items: center;
                 justify-content: center;
+                flex-direction: column;
                 margin-top: -20px; /* 네비게이션 바와의 간격을 줄임 */
             }
             .search-container {
@@ -72,6 +73,9 @@
             .login-container {
                 text-align: center;
                 margin-top: 20px;
+            }
+            .error_msg{
+                color:rgba(248, 95, 95, 0.592)
             }
         </style>
         <h1><p style="text-align: center; color: #FFB900;">League of Legends</p></h1>
@@ -120,6 +124,9 @@
                     <button type="submit">.GG</button>
                 </form>
             </div>
+            {% if msg %}
+            <p class="error_msg">{{msg}}</p>
+            {%endif%}
         </div>
 
         <div class="login-container">

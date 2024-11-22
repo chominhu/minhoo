@@ -404,4 +404,4 @@ if __name__ == '__main__':
     app.run(host="0.0.0.0", port="5000")#, port="443", ssl_context='adhoc')
     
 #프로필아이콘사진 = https://opgg-static.akamaized.net/meta/images/profile_icons/profileIcon(아이콘번호).jpg?image=e_upscale,q_auto:good,f_webp,w_auto&v=1729058249
-#github test
+#github test dkdkdkdk

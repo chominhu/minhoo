@@ -3,7 +3,7 @@ import requests
 import json
 app = Flask(__name__)    #KR_7194336697
 app.secret_key = 'chominhu'
-API_KEY = "RGAPI-3867e020-53d1-4617-9720-24f0488a73d8"
+API_KEY = "RGAPI-40575fe3-5fd6-4bd2-bbea-025c4cb4dba5"
 TOKEN_URL = 'https://kauth.kakao.com/oauth/token'
 CSECRET ="BGDkauFdjU9lEtb1n6G7tesgpoNNONwb"
 CID = "57f9d0c11d0039471ba6a9d38162c466"

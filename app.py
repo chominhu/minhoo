@@ -3,19 +3,45 @@ import requests
 import json
 app = Flask(__name__)    #KR_7194336697
 app.secret_key = 'chominhu'
-API_KEY = "RGAPI-d99fdc77-13a4-4894-8381-fb51379ccf5d"
+API_KEY = "RGAPI-3867e020-53d1-4617-9720-24f0488a73d8"
 TOKEN_URL = 'https://kauth.kakao.com/oauth/token'
 CSECRET ="BGDkauFdjU9lEtb1n6G7tesgpoNNONwb"
 CID = "57f9d0c11d0039471ba6a9d38162c466"
-RURI= "https://minhu.site/callback"   #REDIRECT_URI  #https://127.0.0.1:5000/callback
+RURI= "htt://minhu.site/callback"   #REDIRECT_URI  #https://127.0.0.1:5000/callback
 KAKAO_LOGIN_URL = "https://kauth.kakao.com/oauth/authorize?client_id="+CID+"&redirect_uri="+RURI+"&scope=profile_nickname,profile_image,talk_message&response_type=code"
+
+
+def getMatchHistroy(gameName, tagLine,region,country):
+    response = requests.get("https://"+country+".api.riotgames.com/riot/account/v1/accounts/by-riot-id/"+ gameName+"/"+tagLine+"?api_key="+API_KEY)
+    #게임네임이랑 태그라인 넣어서 apikey 사용해서 puuid를받아오는 API호출해서 응답받은 결과를 response변수에 저장.
+    puuid = response.json()['puuid']
+    #응답받은 response에서, puuid를 추출
+
+    #https://asia.api.riotgames.com/riot/account/v1/accounts/by-riot-id/쮸니1/KR1?api_key=RGAPI-2772a19c-520f-4571-af40-31a5dcb6f07f
+    #puuid로 이제 최근 매치 리스트 볼 수 있는데 API호출
+    matchListResponse = requests.get('https://'+country+'.api.riotgames.com/lol/match/v5/matches/by-puuid/'+puuid+'/ids?start=0&count=20&api_key='+API_KEY)
+    matchListResponse = matchListResponse.json()
+    #printMatchList(matchListResponse)
+    #응답 받은거 json바꾸고 그중 첫번째 매치 번호를 matchNumber0 에 넣기.
+    #print(matchNumber0)
+    matchDetail = []
+    for i in range(5):
+        try:
+            matchDetailResponse = requests.get("https://"+country+".api.riotgames.com/lol/match/v5/matches/"+ matchListResponse[i]+"?api_key="+API_KEY)
+            matchDetailResponse = matchDetailResponse.json()
+            matchDetail.append(matchDetailResponse)
+        except:
+            matchDetailResponse = "error"
+    return matchDetail, puuid
+    #여서 리턴 ㄱㄱ puuid 도 같이 리턴해주네..?
+
+
 
 @app.route('/')
 def gg():
     if session.get('access_token') is not None:
         return render_template ('AG.html', isLogin = True)
     return render_template('AG.html', url = KAKAO_LOGIN_URL, isLogin=False)
-
 
 @app.route('/logout')
 def logout():
@@ -26,20 +52,11 @@ def logout():
     else:
         return redirect("/")
 
-# zz game 접어라
-"""
-여기에 로그아웃 함수 작성 route 를 logout 으로 한다음에
-AG.HTML 에서 로그아웃 버튼 만들고 클릭하면 
-session.clear() 하고 다시 메인화면 리디렉트 할 수 있게
-"""
-
-
 @app.route("/kakaomessage")
 def kakaomessage():
     #라인전 넣기 line = request.args.get('line')
     championname = request.args.get('championname')
     name = request.args.get('name')
-    print(name)
     access_token = session['access_token']  
     headerstr = "Bearer "+access_token
     template_object = {
@@ -126,31 +143,6 @@ def getAuthCode():
     return redirect('/')
 
 
-
-def getMatchHistroy(gameName, tagLine):
-    response = requests.get("https://asia.api.riotgames.com/riot/account/v1/accounts/by-riot-id/"+ gameName+"/"+tagLine+"?api_key="+API_KEY)
-    #게임네임이랑 태그라인 넣어서 apikey 사용해서 puuid를받아오는 API호출해서 응답받은 결과를 response변수에 저장.
-    puuid = response.json()['puuid']
-    #응답받은 response에서, puuid를 추출
-
-    #https://asia.api.riotgames.com/riot/account/v1/accounts/by-riot-id/쮸니1/KR1?api_key=RGAPI-2772a19c-520f-4571-af40-31a5dcb6f07f
-    #puuid로 이제 최근 매치 리스트 볼 수 있는데 API호출
-    matchListResponse = requests.get('https://asia.api.riotgames.com/lol/match/v5/matches/by-puuid/'+puuid+'/ids?start=0&count=20&api_key='+API_KEY)
-    matchListResponse = matchListResponse.json()
-    #printMatchList(matchListResponse)
-    #응답 받은거 json바꾸고 그중 첫번째 매치 번호를 matchNumber0 에 넣기.
-    #print(matchNumber0)
-    matchDetail = []
-    for i in range(5):
-        try:
-            matchDetailResponse = requests.get("https://asia.api.riotgames.com/lol/match/v5/matches/"+ matchListResponse[i]+"?api_key="+API_KEY)
-            matchDetailResponse = matchDetailResponse.json()
-            matchDetail.append(matchDetailResponse)
-        except:
-            matchDetailResponse = "error"
-    return matchDetail, puuid
-    #여서 리턴 ㄱㄱ puuid 도 같이 리턴해주네..?
-
 @app.route('/login', methods=['GET'])
 def kakaotalkLogin():
     url = "http://127.0.0.1:5000"
@@ -163,26 +155,26 @@ def search():
     if request.method == 'GET':
         name = request.args.get('name')
         tag = request.args.get('tag')
+       
     else:
         summoner_name = request.form['summoner_name']
-        print(summoner_name)
+        #print(summoner_name)
         nickname = summoner_name.split('#')
         name = nickname[0]
-        
         tag = nickname[1]
+        region = request.form['region']
+        country = 'asia'
+        if region in ['kr', 'jp', 'sg', 'ph', 'tw', 'vn', 'th']:  # Asia
+            country = 'asia'
+        elif region in ['na', 'br', 'las', 'lan']: 
+            country = 'americas'
+        elif region in ['eu_w', 'eu_ne', 'ru', 'tr']:  
+            country = 'europe'
+        else:
+            country = 'asia'
+
     #이게 제일 중요
-    matchHistoryRetList, puuid = getMatchHistroy(name, tag)
-    PersonalTier = ""
-    PersonalRank = ""
-    try:
-        Personaltier = requests.get("https://kr.api.riotgames.com/lol/league/v4/entries/by-summoner/Wsbfae1squ2_zUNKfUQPKA-J5NzhAUd4mZGr8vBtzPQX49M?api_key="+API_KEY)
-        print("내 티어 결과 수신: ",Personaltier)
-        Personaltier = Personaltier.json()
-        PersonalTier = (Personaltier[0]['tier'])
-        PersonalRank = (Personaltier[0]['rank'])
-    except:
-        PersonalTier = "Undefined"
-        PersonalRank = "Undefined"
+    matchHistoryRetList, puuid = getMatchHistroy(name, tag, region, country)
 
     #매치결과 10개뽑기
     match_history_lst_10 = []
@@ -226,7 +218,7 @@ def search():
             items = [item for item in items if item != 0]
             summonerId = (matchhistory['info']['participants'][a]['summonerId'])
             profileicon = (matchhistory['info']['participants'][a]['profileIcon'])
-            print(profileicon)
+            #print(profileicon)
 
             if items == 2021:
                 items = "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news_live/1da3c726b2c888fcadef76f75de1c24c1ed090cf-512x512.png"
@@ -238,7 +230,7 @@ def search():
             Tier = ""
             Rank = ""
             try:
-                tier_response = requests.get(f"https://kr.api.riotgames.com/lol/league/v4/entries/by-summoner/{summonerId}?api_key={API_KEY}")
+                tier_response = requests.get(f"https://{region}.api.riotgames.com/lol/league/v4/entries/by-summoner/{summonerId}?api_key={API_KEY}")
                 if tier_response.status_code == 200:
                     tier_data = tier_response.json()
                     if tier_data:
@@ -260,8 +252,8 @@ def search():
             else :
                 teamId = "레드"
             level = (matchhistory['info']['participants'][a]['champLevel'])  # Get the championlevel
-            lst = [gamename, teamId, championname, position, kdaa, kill, death, solokill, assists, winandworse, items, Tier, Rank, profileicon, level]  # Add level to the list
-            match_history_lst.append(lst)
+            lst = [gamename, teamId, championname, position, kdaa, kill, death, solokill, assists, winandworse, items, Tier, Rank]  # Add level to the list
+            match_history_lst.append(lst) 
             
 
         redbans = (matchhistory['info']['teams'][0]['bans']) # 레드팀 밴 목록
@@ -278,15 +270,29 @@ def search():
                 bans_lst.append(ban['championId'])
         print(bans_lst)
         match_history_lst_10.append(match_history_lst)
-
         gamemode = (matchhistory['info']['gameMode'])
+    
+    my_summoner_id = (matchhistory['info']['participants'][myIndexNum]['summonerId'])
+    PersonalTier = ""
+    PersonalRank = ""
+    try:
+        Personaltier = requests.get("https://"+region+".api.riotgames.com/lol/league/v4/entries/by-summoner/"+my_summoner_id+"?api_key="+API_KEY)
+        print("내 티어 결과 수신: ",Personaltier)
+        Personaltier = Personaltier.json()
+        PersonalTier = (Personaltier[0]['tier'])
+        PersonalRank = (Personaltier[0]['rank'])
+    except:
+        PersonalTier = "Unranked"
+        PersonalRank = ""
 
 
-    return render_template('a.html', match_history_lst_10 = match_history_lst_10, summoner_name = summoner_name, PersonalTier = PersonalTier, PersonalRank = PersonalRank, level=level)
+
+    return render_template('a.html', match_history_lst_10 = match_history_lst_10, summoner_name = summoner_name, PersonalTier = PersonalTier, PersonalRank = PersonalRank)
 
 
 def printMatchList(matchListResponse):
-    
+    region = request.form['region']
+    country = 'asia'
     for i in range(10):
         matchDetailResponse = requests.get("https://asia.api.riotgames.com/lol/match/v5/matches/"+matchListResponse[i]+"?api_key="+API_KEY)
         print(matchDetailResponse.text)
@@ -313,7 +319,7 @@ def printMatchList(matchListResponse):
         profileicon = (matchhistory['info']['participants'][i]['profileIcon'])
         #여기서 추가 request날리기
         #tier = requests.get('https://asia.api.riotgames.com/lol/league/v4/entries/by-summoner/'+summonerId+"?api_key="+apiKey)
-        tier = requests.get("https://kr.api.riotgames.com/lol/league/v4/entries/by-summoner/"+summonerId+"?api_key="+apiKey)
+        tier = requests.get("https://"+region+".api.riotgames.com/lol/league/v4/entries/by-summoner/"+summonerId+"?api_key="+apiKey)
         tier = tier.json()
         #이후print하기
 
@@ -340,7 +346,24 @@ def printMatchList(matchListResponse):
 
 @app.route('/riot.txt')
 def riot_txt():
-    return render_template('riot_txt.html')
+    return str('riot_txt.html')
+
+@app.route('/total')
+def total():
+    # Fetch all champions from the Riot Games API
+    response = requests.get(f"https://ddragon.leagueoflegends.com/cdn/14.22.1/data/en_US/champion.json")
+    champions_data = response.json()
+    champions = []
+
+    # Extract champion details
+    for champion_key, champion_info in champions_data['data'].items():
+        champions.append({
+            "name": champion_info['name'],
+            "role": champion_info['tags'][0] if champion_info['tags'] else "Unknown",  # Get the first role
+            "win_rate": "N/A"  # Placeholder for win rate
+        })
+
+    return render_template('total.html', champions=champions)
 
 @app.route('/championanalyze')
 def champion_analyze():
@@ -379,3 +402,6 @@ def rangking():
 if __name__ == '__main__':
     app.debug = True
     app.run(host="0.0.0.0", port="5000")#, port="443", ssl_context='adhoc')
+    
+#프로필아이콘사진 = https://opgg-static.akamaized.net/meta/images/profile_icons/profileIcon(아이콘번호).jpg?image=e_upscale,q_auto:good,f_webp,w_auto&v=1729058249
+#github test

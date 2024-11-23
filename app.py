@@ -3,6 +3,8 @@ import requests
 import json
 from typing import List, Dict
 from dataclasses import dataclass
+import traceback
+import os
 
 @dataclass
 class ChampionStats:
@@ -20,7 +22,7 @@ API_KEY = "RGAPI-6fdc0d77-ae7a-466b-b001-41e653eff791"
 TOKEN_URL = 'https://kauth.kakao.com/oauth/token'
 CSECRET ="BGDkauFdjU9lEtb1n6G7tesgpoNNONwb"
 CID = "57f9d0c11d0039471ba6a9d38162c466"
-RURI= "https://minhu.site/callback"   #REDIRECT_URI  #https://127.0.0.1:5000/callback
+RURI= "http://127.0.0.1:5000/callback"   #REDIRECT_URI  #https://127.0.0.1:5000/callback
 KAKAO_LOGIN_URL = "https://kauth.kakao.com/oauth/authorize?client_id="+CID+"&redirect_uri="+RURI+"&scope=profile_nickname,profile_image,talk_message&response_type=code"
 
 
@@ -346,7 +348,7 @@ def printMatchList(matchListResponse):
         print(tier)
         Tier = (tier[0]['tier'])
         Rank = (tier[0]['rank'])
-    #여기서 반복문사용해서 매치기록 10개를 콜하고 프린트하세요
+    #여기서 반복문사용해서 매치기록 10개��� 콜하고 프린트하세요
 
     lst = [gamename, teamId, championname, position, kdaa, kill, death, solokill, assists, winandworse, items,Tier, Rank]
     #print("===============================================================================")
@@ -366,8 +368,26 @@ def printMatchList(matchListResponse):
 
 @app.route('/riot.txt')
 def riot_txt():
-    return render_template('riot_txt.html')
-
+    try:
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        # riot.txt의 전체 경로
+        file_path = os.path.join(current_dir, 'riot.txt')
+        
+        with open(file_path, 'r') as f:
+            content = f.read()
+        return content
+    except FileNotFoundError:
+        print(f"File not found at: {file_path}")  # 디버깅을 위한 경로 출력
+        return "riot.txt file not found", 404
+    except Exception as e:
+        print(f"Error reading riot.txt: {str(e)}")
+        print(f"Error traceback: {traceback.format_exc()}")
+        # 개발 환경에서는 상세한 에러 메시지 반환
+        if app.debug:
+            return f"Error reading riot.txt: {str(e)}", 500
+        # 프로덕션 환경에서는 일반적인 에러 메시지 반환
+        return "Internal server error", 500
+    
 @app.route('/total')
 def total():
     # Fetch all champions from the Riot Games API

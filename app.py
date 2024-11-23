@@ -1,39 +1,58 @@
 from flask import Flask,render_template, request, session, redirect
 import requests
 import json
+from typing import List, Dict
+from dataclasses import dataclass
+
+@dataclass
+class ChampionStats:
+    name: str
+    tier: int
+    role: str
+    win_rate: float
+    pick_rate: float
+    ban_rate: float
+    counters: List[str]
+
 app = Flask(__name__)    #KR_7194336697
 app.secret_key = 'chominhu'
-API_KEY = "RGAPI-40575fe3-5fd6-4bd2-bbea-025c4cb4dba5"
+API_KEY = "RGAPI-6fdc0d77-ae7a-466b-b001-41e653eff791"
 TOKEN_URL = 'https://kauth.kakao.com/oauth/token'
 CSECRET ="BGDkauFdjU9lEtb1n6G7tesgpoNNONwb"
 CID = "57f9d0c11d0039471ba6a9d38162c466"
-RURI= "https://minhu.site/callback"   #REDIRECT_URI  #https://127.0.0.1:5000/callback
+RURI= "http://127.0.0.1:5000/callback"   #REDIRECT_URI  #https://127.0.0.1:5000/callback
 KAKAO_LOGIN_URL = "https://kauth.kakao.com/oauth/authorize?client_id="+CID+"&redirect_uri="+RURI+"&scope=profile_nickname,profile_image,talk_message&response_type=code"
 
 
-def getMatchHistroy(gameName, tagLine,region,country):
-    response = requests.get("https://"+country+".api.riotgames.com/riot/account/v1/accounts/by-riot-id/"+ gameName+"/"+tagLine+"?api_key="+API_KEY)
-    #게임네임이랑 태그라인 넣어서 apikey 사용해서 puuid를받아오는 API호출해서 응답받은 결과를 response변수에 저장.
-    puuid = response.json()['puuid']
-    #응답받은 response에서, puuid를 추출
+def getMatchHistroy(gameName, tagLine, region, country):
+    try:
+        response = requests.get(f"https://{country}.api.riotgames.com/riot/account/v1/accounts/by-riot-id/{gameName}/{tagLine}?api_key={API_KEY}")
+        response.raise_for_status()  # Raises an HTTPError for bad responses
+        data = response.json()
+        puuid = data['puuid']
 
-    #https://asia.api.riotgames.com/riot/account/v1/accounts/by-riot-id/쮸니1/KR1?api_key=RGAPI-2772a19c-520f-4571-af40-31a5dcb6f07f
-    #puuid로 이제 최근 매치 리스트 볼 수 있는데 API호출
-    matchListResponse = requests.get('https://'+country+'.api.riotgames.com/lol/match/v5/matches/by-puuid/'+puuid+'/ids?start=0&count=20&api_key='+API_KEY)
-    matchListResponse = matchListResponse.json()
-    #printMatchList(matchListResponse)
-    #응답 받은거 json바꾸고 그중 첫번째 매치 번호를 matchNumber0 에 넣기.
-    #print(matchNumber0)
-    matchDetail = []
-    for i in range(5):
-        try:
-            matchDetailResponse = requests.get("https://"+country+".api.riotgames.com/lol/match/v5/matches/"+ matchListResponse[i]+"?api_key="+API_KEY)
-            matchDetailResponse = matchDetailResponse.json()
-            matchDetail.append(matchDetailResponse)
-        except:
-            matchDetailResponse = "error"
-    return matchDetail, puuid
-    #여서 리턴 ㄱㄱ puuid 도 같이 리턴해주네..?
+        matchListResponse = requests.get(f'https://{country}.api.riotgames.com/lol/match/v5/matches/by-puuid/{puuid}/ids?start=0&count=20&api_key={API_KEY}')
+        matchListResponse.raise_for_status()
+        matchList = matchListResponse.json()
+
+        matchDetail = []
+        for i in range(5):
+            try:
+                matchDetailResponse = requests.get(f"https://{country}.api.riotgames.com/lol/match/v5/matches/{matchList[i]}?api_key={API_KEY}")
+                matchDetailResponse.raise_for_status()
+                matchDetail.append(matchDetailResponse.json())
+            except (requests.RequestException, IndexError) as e:
+                print(f"Error fetching match detail {i}: {str(e)}")
+                matchDetail.append(None)
+
+        return matchDetail, puuid
+
+    except requests.RequestException as e:
+        print(f"Error in getMatchHistroy: {str(e)}")
+        return [], None
+    except (KeyError, IndexError, ValueError) as e:
+        print(f"Error processing data: {str(e)}")
+        return [], None
 
 
 
@@ -57,6 +76,7 @@ def kakaomessage():
     #라인전 넣기 line = request.args.get('line')
     championname = request.args.get('championname')
     name = request.args.get('name')
+    print(name)
     access_token = session['access_token']  
     headerstr = "Bearer "+access_token
     template_object = {
@@ -158,7 +178,7 @@ def search():
        
     else:
         summoner_name = request.form['summoner_name']
-        #print(summoner_name)
+        print(summoner_name)
         nickname = summoner_name.split('#')
         name = nickname[0]
         tag = nickname[1]
@@ -173,7 +193,7 @@ def search():
         else:
             country = 'asia'
 
-    #이게 제일 중요
+    #이게 제일 중요 
     matchHistoryRetList, puuid = getMatchHistroy(name, tag, region, country)
 
     #매치결과 10개뽑기
@@ -186,7 +206,7 @@ def search():
             if participantsNumbers[i] == puuid:
                 myIndexNum = i
                 break
-        print("내 인덱스 번호: ", myIndexNum)
+        #print("내 인덱스 번호: ", myIndexNum)
         match_history_lst = []
         for a in range(10):
             #10명의 유저 게임 기록 뽑기.
@@ -253,7 +273,7 @@ def search():
                 teamId = "레드"
             level = (matchhistory['info']['participants'][a]['champLevel'])  # Get the championlevel
             lst = [gamename, teamId, championname, position, kdaa, kill, death, solokill, assists, winandworse, items, Tier, Rank]  # Add level to the list
-            match_history_lst.append(lst) 
+            match_history_lst.append(lst)
             
 
         redbans = (matchhistory['info']['teams'][0]['bans']) # 레드팀 밴 목록
@@ -282,12 +302,12 @@ def search():
         PersonalTier = (Personaltier[0]['tier'])
         PersonalRank = (Personaltier[0]['rank'])
     except:
-        PersonalTier = "Unranked"
-        PersonalRank = ""
+        PersonalTier = "Undefined"
+        PersonalRank = "Undefined"
 
 
 
-    return render_template('a.html', match_history_lst_10 = match_history_lst_10, summoner_name = summoner_name, PersonalTier = PersonalTier, PersonalRank = PersonalRank)
+    return render_template('a.html', match_history_lst_10 = match_history_lst_10, summoner_name = summoner_name, PersonalTier = PersonalTier, PersonalRank = PersonalRank, level=level)
 
 
 def printMatchList(matchListResponse):
@@ -346,7 +366,7 @@ def printMatchList(matchListResponse):
 
 @app.route('/riot.txt')
 def riot_txt():
-    return str('riot_txt.html')
+    return render_template('riot_txt.html')
 
 @app.route('/total')
 def total():
@@ -367,18 +387,368 @@ def total():
 
 @app.route('/championanalyze')
 def champion_analyze():
-    # Fetch all champions from the Riot Games API
-    response = requests.get(f"https://ddragon.leagueoflegends.com/cdn/14.22.1/data/en_US/champion.json")
-    champions_data = response.json()
-    champions = []
-
-    # Extract champion details
-    for champion_key, champion_info in champions_data['data'].items():
-        champions.append({
-            "name": champion_info['name'],
-            "role": champion_info['tags'][0] if champion_info['tags'] else "Unknown",  # Get the first role
-            "win_rate": "N/A"  # Placeholder for win rate
-        })
+    champions = [
+        {
+            "name": "Nilah",
+            "korean_name": "닐라",
+            "position": "ADC",
+            "win_rate": 53.38,
+            "pick_rate": 1.56,
+            "ban_rate": 2.73
+        },
+        {
+            "name": "KaiSa",
+            "korean_name": "카이사",
+            "position": "ADC", 
+            "win_rate": 53.21,
+            "pick_rate": 1.87,
+            "ban_rate": 1.52
+        },
+        {
+            "name": "Vex",
+            "korean_name": "벡스",
+            "position": "MID",
+            "win_rate": 52.84,
+            "pick_rate": 2.76,
+            "ban_rate": 7.03
+        },
+        {
+            "name": "Ahri",
+            "korean_name": "아리",
+            "position": "MID",
+            "win_rate": 51.92,
+            "pick_rate": 8.45,
+            "ban_rate": 4.21
+        },
+        {
+            "name": "Jinx",
+            "korean_name": "징크스",
+            "position": "ADC",
+            "win_rate": 51.76,
+            "pick_rate": 12.34,
+            "ban_rate": 2.15
+        },
+        {
+            "name": "Leona",
+            "korean_name": "레오나",
+            "position": "SUP",
+            "win_rate": 51.54,
+            "pick_rate": 6.78,
+            "ban_rate": 3.42
+        },
+        {
+            "name": "Darius",
+            "korean_name": "다리우",
+            "position": "TOP",
+            "win_rate": 51.23,
+            "pick_rate": 9.87,
+            "ban_rate": 15.63
+        },
+        {
+            "name": "LeeSin",
+            "korean_name": "리 신",
+            "position": "JGL",
+            "win_rate": 50.98,
+            "pick_rate": 15.42,
+            "ban_rate": 8.91
+        },
+        {
+            "name": "Yasuo",
+            "korean_name": "야스오",
+            "position": "MID",
+            "win_rate": 50.45,
+            "pick_rate": 18.76,
+            "ban_rate": 22.34
+        },
+        {
+            "name": "Thresh",
+            "korean_name": "쓰레쉬",
+            "position": "SUP",
+            "win_rate": 50.32,
+            "pick_rate": 14.23,
+            "ban_rate": 5.67
+        },
+        {
+            "name": "Aatrox",
+            "korean_name": "아트록스",
+            "position": "TOP",
+            "win_rate": 49.85,
+            "pick_rate": 7.23,
+            "ban_rate": 4.56
+        },
+        {
+            "name": "Ahri",
+            "korean_name": "아리",
+            "position": "MID",
+            "win_rate": 51.92,
+            "pick_rate": 8.45,
+            "ban_rate": 4.21
+        },
+        {
+            "name": "Akali",
+            "korean_name": "아칼리",
+            "position": "MID",
+            "win_rate": 48.76,
+            "pick_rate": 9.12,
+            "ban_rate": 12.34
+        },
+        {
+            "name": "Alistar",
+            "korean_name": "알리스타",
+            "position": "SUP",
+            "win_rate": 50.23,
+            "pick_rate": 4.56,
+            "ban_rate": 1.23
+        },
+        {
+            "name": "Amumu",
+            "korean_name": "아무무",
+            "position": "JGL",
+            "win_rate": 51.34,
+            "pick_rate": 3.45,
+            "ban_rate": 2.11
+        },
+        {
+            "name": "Zyra",
+            "korean_name": "자이라",
+            "position": "SUP",
+            "win_rate": 50.87,
+            "pick_rate": 3.21,
+            "ban_rate": 1.45
+        },
+        {
+            "name": "Annie",
+            "korean_name": "애니",
+            "position": "MID",
+            "win_rate": 51.23,
+            "pick_rate": 2.45,
+            "ban_rate": 0.89
+        },
+        {
+            "name": "Ashe",
+            "korean_name": "애쉬",
+            "position": "ADC",
+            "win_rate": 50.76,
+            "pick_rate": 8.91,
+            "ban_rate": 2.34
+        },
+        {
+            "name": "AurelionSol",
+            "korean_name": "아우렐리온 솔",
+            "position": "MID",
+            "win_rate": 52.12,
+            "pick_rate": 1.23,
+            "ban_rate": 0.67
+        },
+        {
+            "name": "Azir",
+            "korean_name": "아지르",
+            "position": "MID",
+            "win_rate": 48.89,
+            "pick_rate": 3.45,
+            "ban_rate": 1.23
+        },
+        {
+            "name": "Bard",
+            "korean_name": "바드",
+            "position": "SUP",
+            "win_rate": 50.34,
+            "pick_rate": 2.78,
+            "ban_rate": 0.45
+        },
+        {
+            "name": "Blitzcrank",
+            "korean_name": "블리츠크랭크",
+            "position": "SUP",
+            "win_rate": 51.23,
+            "pick_rate": 7.89,
+            "ban_rate": 15.67
+        },
+        {
+            "name": "Brand",
+            "korean_name": "브랜드",
+            "position": "SUP",
+            "win_rate": 50.87,
+            "pick_rate": 4.56,
+            "ban_rate": 2.34
+        },
+        {
+            "name": "Braum",
+            "korean_name": "브라움",
+            "position": "SUP",
+            "win_rate": 49.98,
+            "pick_rate": 3.21,
+            "ban_rate": 0.87
+        },
+        {
+            "name": "Caitlyn",
+            "korean_name": "케이틀린",
+            "position": "ADC",
+            "win_rate": 50.45,
+            "pick_rate": 12.34,
+            "ban_rate": 4.56
+        },
+        {
+            "name": "Camille",
+            "korean_name": "카밀",
+            "position": "TOP",
+            "win_rate": 51.23,
+            "pick_rate": 5.67,
+            "ban_rate": 3.45
+        },
+        {
+            "name": "Zed",
+            "korean_name": "제드",
+            "position": "MID",
+            "win_rate": 49.87,
+            "pick_rate": 15.67,
+            "ban_rate": 25.43
+        },
+        {
+            "name": "Ziggs",
+            "korean_name": "직스",
+            "position": "MID",
+            "win_rate": 50.12,
+            "pick_rate": 2.34,
+            "ban_rate": 0.78
+        },
+        {
+            "name": "Zilean",
+            "korean_name": "질리언",
+            "position": "SUP",
+            "win_rate": 51.34,
+            "pick_rate": 2.12,
+            "ban_rate": 0.56
+        },
+        {
+            "name": "Cassiopeia",
+            "korean_name": "카시오페아",
+            "position": "MID",
+            "win_rate": 51.23,
+            "pick_rate": 3.45,
+            "ban_rate": 2.11
+        },
+        {
+            "name": "Chogath",
+            "korean_name": "초가스",
+            "position": "TOP",
+            "win_rate": 50.87,
+            "pick_rate": 2.34,
+            "ban_rate": 0.89
+        },
+        {
+            "name": "Corki",
+            "korean_name": "코르키",
+            "position": "MID",
+            "win_rate": 49.76,
+            "pick_rate": 1.23,
+            "ban_rate": 0.45
+        },
+        {
+            "name": "Darius",
+            "korean_name": "다리우스",
+            "position": "TOP",
+            "win_rate": 51.34,
+            "pick_rate": 8.90,
+            "ban_rate": 12.34
+        },
+        {
+            "name": "Diana",
+            "korean_name": "다이애나",
+            "position": "JGL",
+            "win_rate": 50.98,
+            "pick_rate": 6.78,
+            "ban_rate": 4.56
+        },
+        {
+            "name": "DrMundo",
+            "korean_name": "문도 박사",
+            "position": "TOP",
+            "win_rate": 50.45,
+            "pick_rate": 3.21,
+            "ban_rate": 1.23
+        },
+        {
+            "name": "Draven",
+            "korean_name": "드레이븐",
+            "position": "ADC",
+            "win_rate": 51.87,
+            "pick_rate": 4.56,
+            "ban_rate": 3.45
+        },
+        {
+            "name": "Ekko",
+            "korean_name": "에코",
+            "position": "JGL",
+            "win_rate": 50.34,
+            "pick_rate": 5.67,
+            "ban_rate": 2.34
+        },
+        {
+            "name": "Elise",
+            "korean_name": "엘리스",
+            "position": "JGL",
+            "win_rate": 51.23,
+            "pick_rate": 3.45,
+            "ban_rate": 1.23
+        },
+        {
+            "name": "Evelynn",
+            "korean_name": "이블린",
+            "position": "JGL",
+            "win_rate": 50.87,
+            "pick_rate": 4.56,
+            "ban_rate": 3.21
+        },
+        {
+            "name": "Ezreal",
+            "korean_name": "이즈리얼",
+            "position": "ADC",
+            "win_rate": 49.98,
+            "pick_rate": 15.67,
+            "ban_rate": 5.43
+        },
+        {
+            "name": "Fiddlesticks",
+            "korean_name": "피들스틱",
+            "position": "JGL",
+            "win_rate": 51.34,
+            "pick_rate": 2.34,
+            "ban_rate": 1.23
+        },
+        {
+            "name": "Fiora",
+            "korean_name": "피오라",
+            "position": "TOP",
+            "win_rate": 50.76,
+            "pick_rate": 7.89,
+            "ban_rate": 8.90
+        },
+        {
+            "name": "Fizz",
+            "korean_name": "피즈",
+            "position": "MID",
+            "win_rate": 50.23,
+            "pick_rate": 4.56,
+            "ban_rate": 3.21
+        },
+        {
+            "name": "Galio",
+            "korean_name": "갈리오",
+            "position": "MID",
+            "win_rate": 49.87,
+            "pick_rate": 2.34,
+            "ban_rate": 0.89
+        },
+        {
+            "name": "Gangplank",
+            "korean_name": "갱플랭크",
+            "position": "TOP",
+            "win_rate": 50.45,
+            "pick_rate": 5.67,
+            "ban_rate": 3.45
+        }
+    ]
 
     return render_template('champion_analyze.html', champions=champions)
 
@@ -399,9 +769,55 @@ def rangking():
 
     return render_template('rangking.html', champions=champions)
 
+@app.route('/champions')
+def champions():
+    # Get query parameters for filtering
+    patch = request.args.get('patch', '14.23')
+    tier = request.args.get('tier', 'emerald_plus') 
+    role = request.args.get('role', 'all')
+
+    # Fetch champion data from Riot API
+    champions_response = requests.get(f"https://ddragon.leagueoflegends.com/cdn/{patch}/data/en_US/champion.json")
+    champions_data = champions_response.json()['data']
+
+    # Create champion stats list (this would normally come from a database)
+    champion_stats: List[ChampionStats] = [
+        ChampionStats(
+            name="Nilah",
+            tier=1,
+            role="Bottom",
+            win_rate=53.36,
+            pick_rate=1.56,
+            ban_rate=2.73,
+            counters=["Xayah", "Sivir", "Ziggs"]
+        ),
+        ChampionStats(
+            name="Cassiopeia", 
+            tier=1,
+            role="Middle",
+            win_rate=53.22,
+            pick_rate=1.87,
+            ban_rate=1.22,
+            counters=["Zoe", "Anivia", "Lissandra"]
+        ),
+        # ... add more champions ...
+    ]
+
+    # Filter by role if specified
+    if role != 'all':
+        champion_stats = [c for c in champion_stats if c.role.lower() == role.lower()]
+
+    # Sort by win rate descending
+    champion_stats.sort(key=lambda x: x.win_rate, reverse=True)
+
+    return render_template(
+        'champions.html',
+        champions=champion_stats,
+        current_patch=patch,
+        current_tier=tier,
+        current_role=role
+    )
+
 if __name__ == '__main__':
     app.debug = True
     app.run(host="0.0.0.0", port="5000")#, port="443", ssl_context='adhoc')
-    
-#프로필아이콘사진 = https://opgg-static.akamaized.net/meta/images/profile_icons/profileIcon(아이콘번호).jpg?image=e_upscale,q_auto:good,f_webp,w_auto&v=1729058249
-#github test dkdkdkdk

@@ -9,7 +9,7 @@
             background-image: url("{{ url_for('static', filename='lol.jpg') }}");
             background-size: cover;
             background-position: center;
-            height: 70px; /* 400px에서 300px로 줄임 */
+            height: 50px; /* 400px에서 300px로 줄임 */
             display: flex;
             align-items: center;
             justify-content: center;
@@ -27,7 +27,7 @@
         }
         .navbar {
             background-color: #5383EB;
-            padding: 10px 0;
+            padding: 20px 0;
         }
         .navbar-container {
             max-width: 1200px;
@@ -54,25 +54,90 @@
             color: #333;
         }
         table {
-            width: 100%;
-            border-collapse: collapse;
+            width: 80%;
+            margin: 20px auto;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         th, td {
-            padding: 10px;
-            text-align: left;
+            padding: 15px;
+            text-align: center;
+            border-bottom: 1px solid #eee;
         }
         th {
-            background-color: #007bff;
-            color: white;
-            height: 30px;
+            background-color: #f8f9fa;
+            color: #666;
+            font-weight: normal;
+            border-top: none;
+        }
+        .champion-cell {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .rank-number {
+            color: #666;
             width: 30px;
         }
-        tr:nth-child(even) {
-            background-color: #f2f2f2;
+        .tier-icon {
+            width: 20px;
+            height: 20px;
+            background-color: #4171d6;
+            color: white;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+        .win-rate {
+            color: #4171d6;
+            font-weight: bold;
         }
         .champion-image {
             width: 50px;
             height: 50px;
+        }
+        .filters {
+            width: 80%;
+            margin: 20px auto;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+        
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        select, input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .sort-icon {
+            cursor: pointer;
+            color: #666;
+            margin-left: 5px;
+        }
+        
+        .sort-icon:hover {
+            color: #4171d6;
+        }
+        
+        .champion-stats {
+            font-size: 0.9em;
+            color: #666;
+        }
+        
+        .position-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 5px;
         }
     </style>
 </head>
@@ -115,30 +180,113 @@
                 <a href="total">통계</a>
             </div>
         </div>
-    </nav>
+    </nav> 
     <h1>챔피언 분석</h1>
-    <table border="1">
-        <tr>
-            <th>챔피언</th>
-            <th>티어</th>
-            <th>포지션</th>
-            <th>승률</th>
-            <th>픽률</th>
-            <th>밴률</th>
-        </tr>
-        {% for champion in champions %}
-        <tr>
-            <td>
-                <img src="https://ddragon.leagueoflegends.com/cdn/13.10.1/img/champion/{{ champion.name }}.png" alt="{{ champion.name }}" class="champion-image"> 
-                {{ champion.name }}
-            </td>
-            <td>{{ champion.tier }}</td>
-            <td>{{ champion.position }}</td>
-            <td>{{ champion.win_rate }}%</td>
-            <td>{{ champion.pick_rate }}%</td>
-            <td>{{ champion.ban_rate }}%</td>
-        </tr>
-        {% endfor %}
+    <div class="filters">
+        <div class="filter-group">
+            <label>포지션:</label>
+            <select id="position-filter">
+                <option value="all">전체</option>
+                <option value="top">탑</option>
+                <option value="jungle">정글</option>
+                <option value="mid">미드</option>
+                <option value="adc">원딜</option>
+                <option value="support">서포터</option>
+            </select>
+        </div>
+        
+        <div class="filter-group"> <!--나중에 추가할 옵션-->
+            <label>티어:</label>
+            <select id="tier-filter">
+                <option value="all">전체</option>
+                <option value="challenger">챌린저</option>
+                <option value="grandmaster">그랜드마스터</option>
+                <option value="master">마스터</option>
+                <option value="diamond">다이아몬드</option>
+                <option value="platinum">플래티넘</option>
+            </select>
+        </div>
+        
+        <div class="filter-group">
+            <label>챔피언 검색:</label>
+            <input type="text" id="champion-search" placeholder="챔피언 이름...">
+        </div>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>순위</th>
+                <th>챔피언</th>
+                <th>포지션</th>
+                <th>티어 <span class="sort-icon">↕️</span></th>
+                <th>승률 <span class="sort-icon">↕️</span></th>
+                <th>픽률 <span class="sort-icon">↕️</span></th>
+                <th>밴률 <span class="sort-icon">↕️</span></th>
+                <th>상세정보</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for champion in champions %}
+            <tr>
+                <td class="rank-number">{{ loop.index }}</td>
+                <td>
+                    <div class="champion-cell">
+                        <img src="https://ddragon.leagueoflegends.com/cdn/13.10.1/img/champion/{{ champion.name }}.png" 
+                             alt="{{ champion.name }}" 
+                             class="champion-image">
+                        <div>
+                            <div>{{ champion.name }}</div>
+                            <div class="champion-stats">{{ champion.korean_name }}</div>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <img src="{{ url_for('static', filename='positions/' + champion.position.lower() + '.png') }}" 
+                         alt="{{ champion.position }}" 
+                         class="position-icon">
+                    {{ champion.pos ition }}
+                </td>
+                <td>
+                    <div class="tier-icon">1</div>
+                </td>
+                <td class="win-rate">{{ "%.2f"|format(champion.win_rate) }}%</td>
+                <td>{{ "%.2f"|format(champion.pick_rate) }}%</td>
+                <td>{{ "%.2f"|format(champion.ban_rate) }}%</td>
+                <td>
+                    <button onclick="showChampionDetails('{{ champion.name }}')">상세보기</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
     </table>
+    <script>
+        // 필터링 및 정렬 기능
+        document.getElementById('position-filter').addEventListener('change', filterChampions);
+        document.getElementById('tier-filter').addEventListener('change', filterChampions);
+        document.getElementById('champion-search').addEventListener('input', filterChampions);
+
+        function filterChampions() {
+            const position = document.getElementById('position-filter').value;
+            const tier = document.getElementById('tier-filter').value;
+            const search = document.getElementById('champion-search').value.toLowerCase();
+            
+            const rows = document.querySelectorAll('tbody tr');
+            
+            rows.forEach(row => {
+                const championPosition = row.querySelector('td:nth-child(3)').textContent.trim().toLowerCase();
+                const championName = row.querySelector('.champion-cell').textContent.trim().toLowerCase();
+                
+                const positionMatch = position === 'all' || championPosition.includes(position);
+                const searchMatch = championName.includes(search);
+                
+                row.style.display = positionMatch && searchMatch ? '' : 'none';
+            });
+        }
+
+        function showChampionDetails(championName) {
+            // 챔피언 상세 정보를 보여주는 모달 또는 새 페이지로 이동
+            alert(`${championName}의 상세 정보를 보여줄 예정입니다.`);
+        }
+    </script>
 </body>
 </html>

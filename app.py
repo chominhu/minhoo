@@ -150,7 +150,7 @@ def getAuthCode():
         'code' : authcode
     })
     token_response = token_response.json()
-    access_token = token_response['access_token']
+    access_token = token_response['access_token'] #왜?
     print(access_token)
     session['access_token'] = access_token
     headerstr = "Bearer "+access_token
